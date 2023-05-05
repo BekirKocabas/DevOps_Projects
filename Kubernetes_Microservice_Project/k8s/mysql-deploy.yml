@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        resources:
+        envFrom:
+          - secretRef:
+              name: mysql-secret
+          - configMapRef:
+              name: phonebook-cm
+        # env:
+        #   - name: MYSQL_ROOT_PASSWORD
+        #     valueFrom:
+        #       secretKeyRef:
+        #         key: MYSQL_ROOT_PASSWORD
+        #         name: mysql-secret
+        #     #value: #<root passwd>
+        #   - name: MYSQL_DATABASE
+        #     valueFrom:
+        #       configMapKeyRef:
+        #         key: MYSQL_DATABASE
+        #         name: phonebook-cm
+        #     #value: phonebook
+        #   - name: MYSQL_USER
+        #     valueFrom:
+        #       configMapKeyRef:
+        #         key: MYSQL_USER
+        #         name: phonebook-cm
+        #     #value: clarus
+        #   - name: MYSQL_PASSWORD
+        #     valueFrom:
+        #       secretKeyRef:
+        #         key: MYSQL_PASSWORD
+        #         name: mysql-secret
+        #     #value: #mysqlpasswd
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mysql-storage
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
